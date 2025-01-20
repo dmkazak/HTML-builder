@@ -4,18 +4,18 @@ const path = require('node:path');
 const sourceDirectoryPath = path.join(__dirname, 'files');
 const targetDirectoryPath = path.join(__dirname, 'files-copy');
 
-fs.mkdir(targetDirectoryPath, onDirectoryCreated);
-fs.readdir(sourceDirectoryPath, (error, fileNames) =>
-  onDirectoryRead(sourceDirectoryPath, error, fileNames),
-);
+fs.rm(targetDirectoryPath, { recursive: true, force: true }, (error) => {
+  handleError(error);
 
+  fs.mkdir(targetDirectoryPath, (error) => {
+    handleError(error);
+
+    fs.readdir(sourceDirectoryPath, (error, fileNames) =>
+      onDirectoryRead(sourceDirectoryPath, error, fileNames),
+    );
+  });
+});
 /////////////////////////////////////////////////////////////////////////////////
-
-function onDirectoryCreated(error) {
-  if (error) {
-    console.error(`Something went wrong while creating directory:\n${error}`);
-  }
-}
 
 function onDirectoryRead(directoryPath, error, fileNames) {
   if (error) {
@@ -29,12 +29,12 @@ function onDirectoryRead(directoryPath, error, fileNames) {
     const sourceFilePath = path.join(directoryPath, fileName);
     const targetFilePath = path.join(targetDirectoryPath, fileName);
 
-    fs.copyFile(sourceFilePath, targetFilePath, onFileCopyError);
+    fs.copyFile(sourceFilePath, targetFilePath, handleError);
   }
 }
 
-function onFileCopyError(error) {
+function handleError(error) {
   if (error) {
-    console.error(`Something went wrong while copying file:\n${error}`);
+    throw new Error(error);
   }
 }
