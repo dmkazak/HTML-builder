@@ -1,22 +1,21 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const fsPromises = require('node:fs/promises');
+const { error } = require('node:console');
 
 const stylesDirectoryPath = path.join(__dirname, 'styles');
 const bundleCssFilePath = path.join(__dirname, 'project-dist', 'bundle.css');
 
-fs.writeFile(bundleCssFilePath, '', onError);
-fs.readdir(stylesDirectoryPath, onDirectoryRead);
+fs.writeFile(bundleCssFilePath, '', (error) => {
+  handleError(error);
+
+  fs.readdir(stylesDirectoryPath, onDirectoryRead);
+});
 
 /////////////////////////////////////////////////////////////////////////////////
 
 async function onDirectoryRead(error, fileNames) {
-  if (error) {
-    console.error(
-      `Something went wrong while reading directory '${stylesDirectoryPath}':\n${error}`,
-    );
-    return;
-  }
+  handleError(error);
 
   const fileReadPromises = fileNames
     .filter((fileName) => path.extname(fileName) === '.css')
@@ -25,12 +24,12 @@ async function onDirectoryRead(error, fileNames) {
 
   const fileContents = await Promise.all(fileReadPromises);
   fileContents.forEach((fileContent) =>
-    fs.appendFile(bundleCssFilePath, fileContent + '\n', onError),
+    fs.appendFile(bundleCssFilePath, fileContent + '\n', handleError),
   );
 }
 
-function onError(error) {
+function handleError(error) {
   if (error) {
-    console.log('Something went wrong while writing to file:\n', error);
+    throw new Error(error);
   }
 }
