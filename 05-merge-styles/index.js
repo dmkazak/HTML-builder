@@ -1,7 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const fsPromises = require('node:fs/promises');
-const { error } = require('node:console');
 
 const stylesDirectoryPath = path.join(__dirname, 'styles');
 const bundleCssFilePath = path.join(__dirname, 'project-dist', 'bundle.css');
